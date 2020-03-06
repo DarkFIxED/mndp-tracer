@@ -4,6 +4,7 @@
              [nodes]="nodes"
              [autoZoom]="true"
              [autoCenter]="true">
+
     <ng-template #linkTemplate let-link>
       <svg:g class="edge">
         <svg:path
@@ -20,6 +21,19 @@
                     startOffset="50%">
             {{link.label}} <!-- not visible -->
           </textPath>
+        </svg:text>
+      </svg:g>
+    </ng-template>
+
+    <ng-template #nodeTemplate let-node>
+      <svg:g class="node">
+        <svg:rect
+                [attr.width]="20"
+                [attr.height]="20"
+                [attr.fill]="'#AAAAAA'"
+        />
+        <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="10">
+          {{node.label}}
         </svg:text>
       </svg:g>
     </ng-template>

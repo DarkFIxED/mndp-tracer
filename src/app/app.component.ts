@@ -1,88 +1,64 @@
 import {Component, OnInit} from '@angular/core';
 import {Edge, Node} from '@swimlane/ngx-graph';
+import {SandboxService} from './services/sandbox.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+	selector: 'app-root',
+	templateUrl: './app.component.html',
+	styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
 
-  title = 'LoRa-Modeling';
-  devicesCount = 10;
-  adjacencyMatrix = [];
+	title = 'LoRa-Modeling';
 
-  nodes: Node[] = [];
-  links: Edge[] = [];
+	private readonly devicesCount = 10;
+	private readonly connectionProbability = 0.3;
+	private readonly maxSignalPropagationTime = 130;
 
-  private readonly connectionProbability = 0.3;
-  private readonly minSensitivity = -130;
+	nodes: Node[] = [];
+	links: Edge[] = [];
 
-  ngOnInit() {
-    console.log('init');
-    this.adjacencyMatrix = this.fillAdjacencyMatrix(this.devicesCount, this.connectionProbability, this.minSensitivity);
-    console.log(this.adjacencyMatrix);
+	constructor(private sandbox: SandboxService) {
+	}
 
-    this.nodes = this.buildNodes(this.adjacencyMatrix);
-    this.links = this.buildLinks(this.adjacencyMatrix);
-  }
+	ngOnInit() {
+		this.sandbox.initialize(this.devicesCount, this.connectionProbability, this.maxSignalPropagationTime);
 
-  private fillAdjacencyMatrix(devicesCount: number, connectionProbability: number, minSensitivity: number): Array<number> {
-    const matrix = [];
-    for (let i = 0; i < devicesCount; i++) {
-      let array = new Array(devicesCount).fill(0);
-      matrix.push(array);
-    }
+		console.log(this.sandbox.adjacencyMatrix);
 
-    for (let row = 0; row < devicesCount; row++) {
-      for (let column = row + 1; column < devicesCount; column++) {
+		this.nodes = this.buildNodes(this.sandbox.adjacencyMatrix);
+		this.links = this.buildLinks(this.sandbox.adjacencyMatrix);
 
-        if (this.shouldBeConnected(connectionProbability)) {
-          let signalStrength = Math.floor(this.generateSignalStrength(minSensitivity));
-          matrix[row][column] = signalStrength;
-          matrix[column][row] = signalStrength;
-        }
-      }
-    }
+		this.sandbox.trace(2, 8);
+	}
 
-    return matrix;
-  }
+	private buildNodes(adjacencyMatrix: any[]) {
+		return adjacencyMatrix.map((row, index) => {
+			return {
+				id: `${index}`,
+				label: `${index}`
+			};
+		});
+	}
 
-  private shouldBeConnected(connectionProbability: number): boolean {
-    return Math.random() <= connectionProbability;
-  }
+	private buildLinks(adjacencyMatrix: any[]) {
+		let result: Edge[] = [];
 
-  private generateSignalStrength(minSensitivity: number): number {
-    return Math.random() * minSensitivity;
-  }
+		for (let row = 0; row < adjacencyMatrix.length; row++) {
+			for (let column = row + 1; column < adjacencyMatrix.length; column++) {
+				let signal = adjacencyMatrix[row][column];
 
-  private buildNodes(adjacencyMatrix: any[]) {
-    return adjacencyMatrix.map((row, index) => {
-      return {
-        id: `${index}`,
-        label: `${index}`
-      };
-    });
-  }
+				if (signal) {
+					result.push({
+						id: `link-${row}-${column}`,
+						label: `${signal}`,
+						source: `${row}`,
+						target: `${column}`
+					});
+				}
+			}
+		}
 
-  private buildLinks(adjacencyMatrix: any[]) {
-    let result: Edge[] = [];
-
-    for (let row = 0; row < adjacencyMatrix.length; row++) {
-      for (let column = row + 1; column < adjacencyMatrix.length; column++) {
-        let signal = adjacencyMatrix[row][column];
-
-        if (signal) {
-          result.push({
-            id: `link-${row}-${column}`,
-            label: `${signal}`,
-            source: `${row}`,
-            target: `${column}`
-          });
-        }
-      }
-    }
-
-    return result;
-  }
+		return result;
+	}
 }

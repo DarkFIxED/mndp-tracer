@@ -71,6 +71,14 @@
     "use-pipe-transform-interface": true,
     "component-class-suffix": true,
     "directive-class-suffix": true,
-    "prefer-const": false
+    "prefer-const": false,
+    "indent": [
+      true,
+      "tabs",
+      2
+    ],
+    "align": false,
+    "no-trailing-whitespace": false,
+    "only-arrow-functions": false
   }
 }

@@ -3,7 +3,11 @@
   "rules": {
     "prefer-const": false,
     "member-ordering": false,
-    "indent": [true, "tabs", 2],
+    "indent": [
+      true,
+      "tabs",
+      2
+    ],
     "directive-selector": [
       true,
       "attribute",
